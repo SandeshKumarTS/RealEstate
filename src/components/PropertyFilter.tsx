@@ -20,9 +20,9 @@ interface PropertyFilterProps {
 }
 
 const formatPriceLabel = (price: number) => {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('en-IN', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'INR',
     maximumFractionDigits: 0,
     notation: 'compact',
   }).format(price);

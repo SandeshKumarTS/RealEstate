@@ -3,6 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { IndianRupee, Map, User } from "lucide-react";
 
 const NavBar: React.FC = () => {
   return (
@@ -11,6 +12,7 @@ const NavBar: React.FC = () => {
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center">
             <h1 className="text-2xl font-bold text-real-blue">RealEstate</h1>
+            <IndianRupee size={20} className="ml-1 text-real-blue" />
           </Link>
           <nav className="hidden md:flex items-center gap-6">
             <Link to="/" className="text-sm font-medium hover:text-real-blue transition-colors">
@@ -20,7 +22,10 @@ const NavBar: React.FC = () => {
               Listings
             </Link>
             <Link to="/map" className="text-sm font-medium hover:text-real-blue transition-colors">
-              Map
+              <div className="flex items-center gap-1">
+                <Map size={16} />
+                <span>Map</span>
+              </div>
             </Link>
           </nav>
         </div>
@@ -46,8 +51,9 @@ const NavBar: React.FC = () => {
               </svg>
             </div>
           </div>
-          <Button variant="outline" className="hidden md:flex">
-            Sign In
+          <Button variant="outline" className="hidden md:flex items-center gap-1">
+            <User size={16} />
+            <span>Sign In</span>
           </Button>
           <Button>Contact Agent</Button>
         </div>
