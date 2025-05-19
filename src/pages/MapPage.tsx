@@ -1,181 +1,73 @@
 
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import NavBar from "@/components/NavBar";
+import { useProperties } from "@/hooks/useProperties";
+import { useAuth } from "@/context/AuthContext";
+import { useSeedProperties } from "@/hooks/useSeedProperties";
 import PropertyMap from "@/components/PropertyMap";
-import PropertyCard from "@/components/PropertyCard";
-import PropertyFilter from "@/components/PropertyFilter";
-import { Property, FilterOptions } from "@/types/property";
-import { properties } from "@/data/properties";
-import { Link } from "react-router-dom";
+import { PropertyWithImages } from "@/hooks/useProperties";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNavigate } from "react-router-dom";
 
 const MapPage = () => {
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>(properties);
-  const [selectedPropertyId, setSelectedPropertyId] = useState<string | undefined>(undefined);
-  const [showFilters, setShowFilters] = useState(false);
-
-  const handleFilterChange = (filters: FilterOptions) => {
-    const filtered = properties.filter(property => {
-      // Price range filter
-      if (property.price < filters.priceRange[0] || property.price > filters.priceRange[1]) {
-        return false;
-      }
-      
-      // Bedrooms filter
-      if (filters.bedrooms !== null && property.bedrooms < filters.bedrooms) {
-        return false;
-      }
-      
-      // Bathrooms filter
-      if (filters.bathrooms !== null && property.bathrooms < filters.bathrooms) {
-        return false;
-      }
-      
-      // Property type filter
-      if (filters.propertyType !== null && property.propertyType !== filters.propertyType) {
-        return false;
-      }
-      
-      // Features filter
-      if (filters.features.length > 0) {
-        const hasAllFeatures = filters.features.every(feature => 
-          property.features.includes(feature)
-        );
-        if (!hasAllFeatures) {
-          return false;
-        }
-      }
-      
-      return true;
-    });
-    
-    setFilteredProperties(filtered);
-    if (filtered.length > 0) {
-      setSelectedPropertyId(filtered[0].id);
-    } else {
-      setSelectedPropertyId(undefined);
+  const { user } = useAuth();
+  const { properties, loading } = useProperties();
+  const { seedProperties } = useSeedProperties();
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    if (user) {
+      // Seed properties if user is logged in
+      seedProperties(user.id);
     }
-  };
+  }, [user]);
 
-  const handlePropertySelect = (property: Property) => {
-    setSelectedPropertyId(property.id);
+  const handlePropertySelect = (property: PropertyWithImages) => {
+    navigate(`/property/${property.id}`);
   };
-
-  const selectedProperty = filteredProperties.find(p => p.id === selectedPropertyId);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex flex-col min-h-screen">
       <NavBar />
-      
-      <main className="flex-grow flex flex-col">
-        <div className="container mx-auto py-6">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-3xl font-bold">Property Map</h1>
-              <p className="text-muted-foreground">
-                Explore {filteredProperties.length} properties on the map
+      <div className="container mx-auto flex-1 p-4">
+        <div className="flex flex-col md:flex-row md:space-x-6">
+          <div className="md:w-1/3 mb-4 md:mb-0">
+            <div className="bg-card p-4 rounded-lg shadow">
+              <h2 className="text-xl font-bold mb-4">Properties Map</h2>
+              <p className="text-muted-foreground mb-4">
+                Explore properties across Bangalore with our interactive map. Click on a property marker to view more details.
               </p>
-            </div>
-            <div className="flex gap-4">
-              <Button 
-                variant="outline" 
-                onClick={() => setShowFilters(!showFilters)}
-              >
-                {showFilters ? "Hide Filters" : "Show Filters"}
-              </Button>
-              <Button asChild variant="outline">
-                <Link to="/listings">View List</Link>
-              </Button>
-            </div>
-          </div>
-          
-          {showFilters && (
-            <div className="mb-6">
-              <PropertyFilter onFilterChange={handleFilterChange} />
-            </div>
-          )}
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-240px)]">
-            <div className="lg:col-span-2 h-full">
-              <PropertyMap 
-                properties={filteredProperties} 
-                onPropertySelect={handlePropertySelect} 
-                selectedPropertyId={selectedPropertyId}
-              />
-            </div>
-            
-            <div className="h-full overflow-y-auto border rounded-lg bg-white">
-              <Tabs defaultValue="properties" className="w-full">
-                <div className="p-4 border-b">
-                  <TabsList className="w-full">
-                    <TabsTrigger value="properties" className="flex-1">Properties</TabsTrigger>
-                    <TabsTrigger value="selected" className="flex-1">Selected</TabsTrigger>
-                  </TabsList>
+              {!user && (
+                <div className="bg-muted p-4 rounded-md mb-4">
+                  <p className="text-sm mb-2">Sign in to list your own property or save favorites.</p>
+                  <Button onClick={() => navigate("/auth")} size="sm" className="w-full">
+                    Sign In / Register
+                  </Button>
                 </div>
-                
-                <TabsContent value="properties" className="p-4">
-                  {filteredProperties.length === 0 ? (
-                    <div className="text-center py-8">
-                      <p className="text-muted-foreground">No properties match your filters.</p>
-                      <Button 
-                        variant="link" 
-                        onClick={() => handleFilterChange({
-                          priceRange: [100000, 2000000],
-                          bedrooms: null,
-                          bathrooms: null,
-                          propertyType: null,
-                          features: []
-                        })}
-                      >
-                        Reset filters
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {filteredProperties.map(property => (
-                        <div 
-                          key={property.id}
-                          onClick={() => handlePropertySelect(property)}
-                          className={`cursor-pointer border rounded transition-colors ${
-                            selectedPropertyId === property.id ? 'border-real-blue' : 'border-transparent'
-                          }`}
-                        >
-                          <PropertyCard property={property} />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </TabsContent>
-                
-                <TabsContent value="selected" className="p-4">
-                  {selectedProperty ? (
-                    <div>
-                      <PropertyCard property={selectedProperty} />
-                      <div className="mt-4">
-                        <Button asChild className="w-full">
-                          <Link to={`/property/${selectedProperty.id}`}>View Details</Link>
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-muted-foreground">No property selected.</p>
-                      <p className="text-muted-foreground">Click on a map marker to view details.</p>
-                    </div>
-                  )}
-                </TabsContent>
-              </Tabs>
+              )}
+              <div className="text-sm text-muted-foreground">
+                <p>Showing {properties.length} properties in Bangalore region.</p>
+              </div>
             </div>
           </div>
+          
+          <div className="md:w-2/3 h-[70vh]">
+            {loading ? (
+              <div className="w-full h-full flex items-center justify-center bg-muted rounded-lg">
+                <div className="flex flex-col items-center">
+                  <div className="w-8 h-8 border-4 border-t-primary rounded-full animate-spin mb-2"></div>
+                  <p className="text-muted-foreground">Loading map...</p>
+                </div>
+              </div>
+            ) : (
+              <PropertyMap 
+                properties={properties} 
+                onPropertySelect={handlePropertySelect}
+              />
+            )}
+          </div>
         </div>
-      </main>
-      
-      <footer className="bg-white border-t py-4">
-        <div className="container mx-auto text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} RealEstate. All rights reserved.</p>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 };

@@ -9,15 +9,22 @@ export interface Property {
   price: number;
   bedrooms: number;
   bathrooms: number;
-  squareFeet: number;
-  description: string;
-  images: string[];
-  latitude: number;
-  longitude: number;
-  features: string[];
-  propertyType: 'house' | 'apartment' | 'condo' | 'townhouse';
-  yearBuilt: number;
+  squareFeet: number | undefined;
+  square_feet: number;
+  description: string | null;
+  images?: string[];
+  latitude: number | null;
+  longitude: number | null;
+  features: string[] | null;
+  propertyType?: 'house' | 'apartment' | 'condo' | 'townhouse';
+  property_type: string;
+  yearBuilt?: number | null;
+  year_built: number | null;
   isFeatured?: boolean;
+  is_featured?: boolean | null;
+  user_id: string;
+  created_at?: string | null;
+  updated_at?: string | null;
 }
 
 export interface FilterOptions {

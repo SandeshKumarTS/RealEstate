@@ -1,11 +1,23 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { IndianRupee, Map, User } from "lucide-react";
+import { IndianRupee, Map, User, LogOut } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const NavBar: React.FC = () => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleAuthAction = () => {
+    if (user) {
+      signOut();
+    } else {
+      navigate("/auth");
+    }
+  };
+
   return (
     <header className="sticky top-0 z-40 w-full bg-white shadow-sm">
       <div className="container flex h-16 items-center justify-between py-4">
@@ -27,6 +39,11 @@ const NavBar: React.FC = () => {
                 <span>Map</span>
               </div>
             </Link>
+            {user && (
+              <Link to="/my-properties" className="text-sm font-medium hover:text-real-blue transition-colors">
+                My Properties
+              </Link>
+            )}
           </nav>
         </div>
         <div className="flex items-center gap-4">
@@ -51,11 +68,33 @@ const NavBar: React.FC = () => {
               </svg>
             </div>
           </div>
-          <Button variant="outline" className="hidden md:flex items-center gap-1">
-            <User size={16} />
-            <span>Sign In</span>
+          <Button 
+            variant="outline" 
+            className="hidden md:flex items-center gap-1"
+            onClick={handleAuthAction}
+          >
+            {user ? (
+              <>
+                <LogOut size={16} />
+                <span>Sign Out</span>
+              </>
+            ) : (
+              <>
+                <User size={16} />
+                <span>Sign In</span>
+              </>
+            )}
           </Button>
-          <Button>Contact Agent</Button>
+          {user && (
+            <Button onClick={() => navigate("/add-property")}>
+              List Property
+            </Button>
+          )}
+          {!user && (
+            <Button onClick={() => navigate("/auth")}>
+              Contact Agent
+            </Button>
+          )}
         </div>
       </div>
     </header>
