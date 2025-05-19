@@ -100,14 +100,14 @@ const PropertyFilter: React.FC<PropertyFilterProps> = ({ onFilterChange }) => {
           <div className="space-y-2">
             <Label htmlFor="bedrooms">Bedrooms</Label>
             <Select
-              value={bedrooms?.toString() || ""}
+              value={bedrooms?.toString() || undefined}
               onValueChange={(value) => setBedrooms(value ? parseInt(value) : null)}
             >
               <SelectTrigger id="bedrooms">
                 <SelectValue placeholder="Any" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any</SelectItem>
+                <SelectItem value="any">Any</SelectItem>
                 <SelectItem value="1">1+</SelectItem>
                 <SelectItem value="2">2+</SelectItem>
                 <SelectItem value="3">3+</SelectItem>
@@ -120,14 +120,14 @@ const PropertyFilter: React.FC<PropertyFilterProps> = ({ onFilterChange }) => {
           <div className="space-y-2">
             <Label htmlFor="bathrooms">Bathrooms</Label>
             <Select
-              value={bathrooms?.toString() || ""}
+              value={bathrooms?.toString() || undefined}
               onValueChange={(value) => setBathrooms(value ? parseInt(value) : null)}
             >
               <SelectTrigger id="bathrooms">
                 <SelectValue placeholder="Any" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any</SelectItem>
+                <SelectItem value="any">Any</SelectItem>
                 <SelectItem value="1">1+</SelectItem>
                 <SelectItem value="2">2+</SelectItem>
                 <SelectItem value="3">3+</SelectItem>
@@ -140,14 +140,14 @@ const PropertyFilter: React.FC<PropertyFilterProps> = ({ onFilterChange }) => {
         <div className="space-y-2">
           <Label htmlFor="property-type">Property Type</Label>
           <Select
-            value={propertyType || ""}
+            value={propertyType || undefined}
             onValueChange={(value) => setPropertyType(value || null)}
           >
             <SelectTrigger id="property-type">
               <SelectValue placeholder="Any type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Any type</SelectItem>
+              <SelectItem value="any">Any type</SelectItem>
               <SelectItem value="house">House</SelectItem>
               <SelectItem value="apartment">Apartment</SelectItem>
               <SelectItem value="condo">Condo</SelectItem>
