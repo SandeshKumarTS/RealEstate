@@ -3,10 +3,11 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Property } from '@/types/property';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { PropertyWithImages } from '@/hooks/useProperties';
 
 interface PropertyMapProps {
-  properties: Property[];
-  onPropertySelect?: (property: Property) => void;
+  properties: Property[] | PropertyWithImages[];
+  onPropertySelect?: (property: Property | PropertyWithImages) => void;
   selectedPropertyId?: string;
 }
 
@@ -16,33 +17,92 @@ const PropertyMap: React.FC<PropertyMapProps> = ({
   selectedPropertyId 
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const [mapApiLoaded, setMapApiLoaded] = useState(false);
-  const [mapboxToken, setMapboxToken] = useState<string>('');
-
-  // This is a placeholder for the actual Mapbox implementation
-  // In a real application, you would load the Mapbox GL JS library
-  // and initialize a map with the property locations
-  
-  const [showMapTokenInput, setShowMapTokenInput] = useState(true);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
-    // This effect would normally initialize the map
-    // when the component mounts and the token is available
-    if (mapApiLoaded && mapboxToken && mapContainer.current) {
-      // Here you would initialize Mapbox
-      console.log("Initializing map with token:", mapboxToken);
-    }
-  }, [mapApiLoaded, mapboxToken]);
+    // Load Leaflet dynamically
+    const loadLeaflet = async () => {
+      if (!window.L && !document.getElementById('leaflet-css')) {
+        // Load Leaflet CSS
+        const leafletCSS = document.createElement('link');
+        leafletCSS.id = 'leaflet-css';
+        leafletCSS.rel = 'stylesheet';
+        leafletCSS.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        leafletCSS.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+        leafletCSS.crossOrigin = '';
+        document.head.appendChild(leafletCSS);
 
-  const handleTokenSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const token = formData.get('mapboxToken') as string;
-    if (token) {
-      setMapboxToken(token);
-      setShowMapTokenInput(false);
+        // Load Leaflet JS
+        await new Promise<void>((resolve) => {
+          const leafletScript = document.createElement('script');
+          leafletScript.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+          leafletScript.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
+          leafletScript.crossOrigin = '';
+          leafletScript.onload = () => resolve();
+          document.head.appendChild(leafletScript);
+        });
+      }
+
+      setMapLoaded(true);
+    };
+
+    loadLeaflet();
+  }, []);
+
+  useEffect(() => {
+    if (!mapLoaded || !mapContainer.current || !window.L) return;
+
+    // Initialize map
+    const map = window.L.map(mapContainer.current).setView([28.6139, 77.2090], 10); // Default to Delhi, India
+
+    // Add OpenStreetMap tiles
+    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Add markers for properties
+    const markers: any[] = [];
+    const validProperties = properties.filter(property => 
+      typeof property.latitude === 'number' && 
+      typeof property.longitude === 'number'
+    );
+
+    if (validProperties.length > 0) {
+      validProperties.forEach(property => {
+        if (property.latitude && property.longitude) {
+          const marker = window.L.marker([property.latitude, property.longitude])
+            .addTo(map)
+            .bindPopup(`<b>${property.title}</b><br>${property.address}`);
+          
+          marker.on('click', () => {
+            if (onPropertySelect) {
+              onPropertySelect(property);
+            }
+          });
+          
+          markers.push(marker);
+        }
+      });
+
+      // Fit bounds to markers if we have any valid properties
+      if (markers.length > 0) {
+        const bounds = window.L.featureGroup(markers).getBounds();
+        map.fitBounds(bounds, { padding: [30, 30] });
+      }
+
+      // Highlight selected property
+      if (selectedPropertyId) {
+        const selectedProperty = validProperties.find(p => p.id === selectedPropertyId);
+        if (selectedProperty && selectedProperty.latitude && selectedProperty.longitude) {
+          map.setView([selectedProperty.latitude, selectedProperty.longitude], 15);
+        }
+      }
     }
-  };
+
+    return () => {
+      map.remove();
+    };
+  }, [mapLoaded, properties, selectedPropertyId, onPropertySelect]);
 
   const formatPrice = (price: number): string => {
     return new Intl.NumberFormat("en-IN", {
@@ -52,109 +112,28 @@ const PropertyMap: React.FC<PropertyMapProps> = ({
     }).format(price);
   };
 
+  if (!mapLoaded) {
+    return (
+      <div className="relative w-full h-full bg-gray-100 rounded-lg overflow-hidden border flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-6 h-6 border-2 border-t-blue-500 rounded-full animate-spin mx-auto mb-2"></div>
+          <p className="text-sm text-muted-foreground">Loading map...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative w-full h-full bg-gray-100 rounded-lg overflow-hidden border">
-      {showMapTokenInput ? (
-        <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
-          <div className="w-full max-w-md p-6 bg-card rounded-lg shadow-lg">
-            <h3 className="text-lg font-semibold mb-4">Mapbox API Token Required</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              To display the property map, please enter your Mapbox public token.
-              You can find this in your Mapbox account dashboard.
-            </p>
-            <form onSubmit={handleTokenSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="mapboxToken" className="text-sm font-medium">
-                  Mapbox Public Token
-                </label>
-                <input
-                  id="mapboxToken"
-                  name="mapboxToken"
-                  type="text"
-                  className="w-full p-2 border rounded-md"
-                  placeholder="pk.eyJ1Ijoi..."
-                  required
-                />
-              </div>
-              <div className="flex justify-end">
-                <Button type="submit">
-                  Load Map
-                </Button>
-              </div>
-            </form>
-          </div>
+      <div ref={mapContainer} className="w-full h-full"></div>
+      
+      {/* Property markers display for invalid locations - simulation */}
+      {properties.filter(property => !property.latitude || !property.longitude).length > 0 && (
+        <div className="absolute bottom-4 right-4 bg-card p-3 rounded-md shadow-md max-w-xs">
+          <p className="text-xs text-muted-foreground">
+            Some properties don't have valid coordinates and aren't shown on the map.
+          </p>
         </div>
-      ) : (
-        <>
-          <div ref={mapContainer} className="w-full h-full">
-            {/* Placeholder for the map that would be rendered by Mapbox */}
-            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-              <p className="text-muted-foreground text-sm">
-                Map would load here with proper Mapbox integration
-              </p>
-            </div>
-          </div>
-          
-          {/* Property markers simulation */}
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="relative w-full h-full">
-              {properties.map((property) => (
-                <div
-                  key={property.id}
-                  className={`absolute transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto
-                    ${property.id === selectedPropertyId ? 'z-10' : 'z-0'}`}
-                  style={{
-                    // Position markers using relative coordinates for the simulation
-                    left: `${(property.longitude + 98) * 10}%`,
-                    top: `${(31 - property.latitude) * 10}%`,
-                  }}
-                >
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={property.id === selectedPropertyId ? "default" : "outline"}
-                        className={`h-8 w-8 rounded-full p-0 ${
-                          property.id === selectedPropertyId 
-                            ? 'bg-real-blue text-white' 
-                            : 'bg-white'
-                        }`}
-                        onClick={() => onPropertySelect?.(property)}
-                      >
-                        <span className="sr-only">View property</span>
-                        ${property.price / 100000}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-64 p-0">
-                      <div className="overflow-hidden rounded-t-md">
-                        <img
-                          src={property.images[0]}
-                          alt={property.title}
-                          className="w-full h-32 object-cover"
-                        />
-                      </div>
-                      <div className="p-3">
-                        <h4 className="font-semibold">{property.title}</h4>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {property.address}, {property.city}
-                        </p>
-                        <p className="font-medium text-real-blue mt-1">
-                          {formatPrice(property.price)}
-                        </p>
-                        <div className="flex text-xs mt-1">
-                          <span>{property.bedrooms} bd</span>
-                          <span className="mx-1">|</span>
-                          <span>{property.bathrooms} ba</span>
-                          <span className="mx-1">|</span>
-                          <span>{property.squareFeet.toLocaleString()} sqft</span>
-                        </div>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
       )}
     </div>
   );

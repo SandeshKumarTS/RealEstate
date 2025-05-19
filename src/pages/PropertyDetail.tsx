@@ -7,13 +7,26 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { getPropertyById } from "@/data/properties";
+import { useProperty } from "@/hooks/useProperties";
+import PropertyMap from "@/components/PropertyMap";
 
 const PropertyDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const property = getPropertyById(id || "");
+  const { property, loading, error } = useProperty(id || "");
 
-  if (!property) {
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <NavBar />
+        <div className="flex-grow container mx-auto py-12 px-4 text-center">
+          <div className="w-6 h-6 border-2 border-t-blue-500 rounded-full animate-spin mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">Loading property details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !property) {
     return (
       <div className="min-h-screen flex flex-col">
         <NavBar />
@@ -31,9 +44,9 @@ const PropertyDetail = () => {
   }
 
   const formatPrice = (price: number): string => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-IN", {
       style: "currency",
-      currency: "USD",
+      currency: "INR",
       maximumFractionDigits: 0,
     }).format(price);
   };
@@ -61,7 +74,7 @@ const PropertyDetail = () => {
               <div className="mb-6">
                 <div className="flex flex-wrap items-center justify-between mb-2">
                   <h1 className="text-3xl font-bold">{property.title}</h1>
-                  <Badge className="bg-real-blue">{property.propertyType}</Badge>
+                  <Badge className="bg-real-blue">{property.property_type}</Badge>
                 </div>
                 <p className="text-lg text-muted-foreground">
                   {property.address}, {property.city}, {property.state} {property.zip}
@@ -83,13 +96,13 @@ const PropertyDetail = () => {
                 </Card>
                 <Card>
                   <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold">{property.squareFeet.toLocaleString()}</div>
+                    <div className="text-2xl font-bold">{property.square_feet.toLocaleString()}</div>
                     <div className="text-sm text-muted-foreground">Sq Ft</div>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold">{property.yearBuilt}</div>
+                    <div className="text-2xl font-bold">{property.year_built || 'N/A'}</div>
                     <div className="text-sm text-muted-foreground">Year Built</div>
                   </CardContent>
                 </Card>
@@ -102,26 +115,29 @@ const PropertyDetail = () => {
                 </p>
               </div>
               
-              <div className="mb-8">
-                <h2 className="text-xl font-bold mb-4">Features</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {property.features.map(feature => (
-                    <div key={feature} className="flex items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-real-blue">
-                        <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
-                      </svg>
-                      <span>{feature}</span>
-                    </div>
-                  ))}
+              {property.features && property.features.length > 0 && (
+                <div className="mb-8">
+                  <h2 className="text-xl font-bold mb-4">Features</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {property.features.map((feature, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-real-blue">
+                          <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
+                        </svg>
+                        <span>{feature}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
               
               <div>
                 <h2 className="text-xl font-bold mb-4">Location</h2>
-                <div className="aspect-video bg-muted rounded-lg flex items-center justify-center border">
-                  <p className="text-muted-foreground text-sm">
-                    Map would be displayed here with Mapbox integration
-                  </p>
+                <div className="aspect-video rounded-lg border h-[400px]">
+                  <PropertyMap 
+                    properties={[property]} 
+                    selectedPropertyId={property.id}
+                  />
                 </div>
               </div>
             </div>
@@ -134,7 +150,7 @@ const PropertyDetail = () => {
                       {formatPrice(property.price)}
                     </div>
                     <div className="text-muted-foreground">
-                      {Math.round(property.price / property.squareFeet).toLocaleString()} per sqft
+                      {Math.round(property.price / property.square_feet).toLocaleString()} per sqft
                     </div>
                   </div>
                   
