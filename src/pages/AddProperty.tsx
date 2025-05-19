@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -84,7 +83,7 @@ const AddProperty = () => {
 
     try {
       // Insert property - fix the property object to match the required fields
-      const propertyData = {
+      const propertyToInsert = {
         title: data.title,
         description: data.description,
         address: data.address,
@@ -103,15 +102,19 @@ const AddProperty = () => {
         user_id: user.id
       };
 
-      const { data: propertyData, error: propertyError } = await supabase
+      const { data: insertedProperty, error: propertyError } = await supabase
         .from("properties")
-        .insert(propertyData)
+        .insert(propertyToInsert)
         .select("id")
         .single();
 
       if (propertyError) throw propertyError;
 
-      const propertyId = propertyData.id;
+      if (!insertedProperty || !insertedProperty.id) {
+        throw new Error("Failed to get property ID after insertion");
+      }
+
+      const propertyId = insertedProperty.id;
 
       // Upload images if there are any
       if (selectedFiles.length > 0) {
