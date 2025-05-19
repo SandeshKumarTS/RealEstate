@@ -83,13 +83,29 @@ const AddProperty = () => {
     setIsSubmitting(true);
 
     try {
-      // Insert property
+      // Insert property - fix the property object to match the required fields
+      const propertyData = {
+        title: data.title,
+        description: data.description,
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        zip: data.zip,
+        price: data.price,
+        bedrooms: data.bedrooms,
+        bathrooms: data.bathrooms,
+        square_feet: data.square_feet,
+        year_built: data.year_built,
+        property_type: data.property_type,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        features: data.features,
+        user_id: user.id
+      };
+
       const { data: propertyData, error: propertyError } = await supabase
         .from("properties")
-        .insert({
-          ...data,
-          user_id: user.id,
-        })
+        .insert(propertyData)
         .select("id")
         .single();
 
