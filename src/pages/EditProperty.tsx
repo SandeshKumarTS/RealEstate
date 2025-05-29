@@ -86,7 +86,7 @@ const EditProperty = () => {
             property_type: data.property_type,
             latitude: data.latitude || undefined,
             longitude: data.longitude || undefined,
-            features: data.features?.join(", ") || "",
+            features: Array.isArray(data.features) ? data.features.join(", ") : "",
           });
         }
       } catch (error) {
@@ -379,7 +379,6 @@ const EditProperty = () => {
                           <Input 
                             {...field} 
                             placeholder="Air Conditioning, Swimming Pool, Garden, Gym, Parking"
-                            value={Array.isArray(field.value) ? field.value.join(", ") : field.value}
                           />
                         </FormControl>
                         <FormDescription>
