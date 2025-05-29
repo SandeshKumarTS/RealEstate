@@ -124,12 +124,12 @@ const PropertyMap: React.FC<PropertyMapProps> = ({
   }
 
   return (
-    <div className="relative w-full h-full bg-gray-100 rounded-lg overflow-hidden border">
-      <div ref={mapContainer} className="w-full h-full"></div>
+    <div className="relative w-full h-full bg-gray-100 rounded-lg overflow-hidden border z-10">
+      <div ref={mapContainer} className="w-full h-full z-10"></div>
       
       {/* Property markers display for invalid locations - simulation */}
       {properties.filter(property => !property.latitude || !property.longitude).length > 0 && (
-        <div className="absolute bottom-4 right-4 bg-card p-3 rounded-md shadow-md max-w-xs">
+        <div className="absolute bottom-4 right-4 bg-card p-3 rounded-md shadow-md max-w-xs z-20">
           <p className="text-xs text-muted-foreground">
             Some properties don't have valid coordinates and aren't shown on the map.
           </p>
