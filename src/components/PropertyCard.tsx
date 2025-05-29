@@ -23,17 +23,17 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
       <div className="relative">
         <AspectRatio ratio={4 / 3}>
           <img
-            src={property.images[0]}
+            src={property.images && property.images[0] ? property.images[0] : "/placeholder.svg"}
             alt={property.title}
             className="object-cover w-full h-full transition-transform group-hover:scale-105"
           />
         </AspectRatio>
         <div className="absolute top-2 right-2">
           <Badge variant="default" className="bg-real-blue hover:bg-real-accent">
-            {property.propertyType}
+            {property.propertyType || property.property_type}
           </Badge>
         </div>
-        {property.isFeatured && (
+        {(property.isFeatured || property.is_featured) && (
           <div className="absolute bottom-2 left-2">
             <Badge variant="default" className="bg-real-dark">
               Featured
@@ -55,7 +55,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
             <span className="text-muted-foreground">|</span>
             <span>{property.bathrooms} ba</span>
             <span className="text-muted-foreground">|</span>
-            <span>{property.squareFeet.toLocaleString()} sqft</span>
+            <span>{(property.squareFeet || property.square_feet || 0).toLocaleString()} sqft</span>
           </div>
         </div>
       </div>

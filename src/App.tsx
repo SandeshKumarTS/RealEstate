@@ -14,6 +14,7 @@ import Auth from "./pages/Auth";
 import ProfilePage from "./pages/ProfilePage";
 import MyProperties from "./pages/MyProperties";
 import AddProperty from "./pages/AddProperty";
+import EditProperty from "./pages/EditProperty";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/my-properties" element={<MyProperties />} />
             <Route path="/add-property" element={<AddProperty />} />
+            <Route path="/edit-property/:id" element={<EditProperty />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
