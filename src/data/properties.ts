@@ -30,6 +30,8 @@ export const properties: Property[] = [
     isFeatured: true,
     is_featured: true,
     user_id: "dummy-user-1",
+    owner_name: "Rajesh Kumar",
+    owner_phone: "+91 98765 43210",
     created_at: "2024-01-01T00:00:00Z",
     updated_at: "2024-01-01T00:00:00Z"
   },
@@ -61,6 +63,8 @@ export const properties: Property[] = [
     isFeatured: false,
     is_featured: false,
     user_id: "dummy-user-2",
+    owner_name: "Priya Sharma",
+    owner_phone: "+91 87654 32109",
     created_at: "2024-01-02T00:00:00Z",
     updated_at: "2024-01-02T00:00:00Z"
   },
@@ -92,6 +96,8 @@ export const properties: Property[] = [
     isFeatured: true,
     is_featured: true,
     user_id: "dummy-user-3",
+    owner_name: "Arun Patel",
+    owner_phone: "+91 76543 21098",
     created_at: "2024-01-03T00:00:00Z",
     updated_at: "2024-01-03T00:00:00Z"
   },
@@ -123,6 +129,8 @@ export const properties: Property[] = [
     isFeatured: false,
     is_featured: false,
     user_id: "dummy-user-4",
+    owner_name: "Meera Reddy",
+    owner_phone: "+91 65432 10987",
     created_at: "2024-01-04T00:00:00Z",
     updated_at: "2024-01-04T00:00:00Z"
   },
@@ -154,6 +162,8 @@ export const properties: Property[] = [
     isFeatured: false,
     is_featured: false,
     user_id: "dummy-user-5",
+    owner_name: "Vikram Singh",
+    owner_phone: "+91 54321 09876",
     created_at: "2024-01-05T00:00:00Z",
     updated_at: "2024-01-05T00:00:00Z"
   },
@@ -185,6 +195,8 @@ export const properties: Property[] = [
     isFeatured: false,
     is_featured: false,
     user_id: "dummy-user-6",
+    owner_name: "Sunita Iyer",
+    owner_phone: "+91 43210 98765",
     created_at: "2024-01-06T00:00:00Z",
     updated_at: "2024-01-06T00:00:00Z"
   }
