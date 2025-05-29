@@ -86,7 +86,7 @@ const EditProperty = () => {
             property_type: data.property_type,
             latitude: data.latitude || undefined,
             longitude: data.longitude || undefined,
-            features: Array.isArray(data.features) ? data.features.join(", ") : "",
+            features: Array.isArray(data.features) ? data.features.join(", ") : (data.features || ""),
           });
         }
       } catch (error) {
