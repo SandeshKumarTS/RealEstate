@@ -22,6 +22,8 @@ export interface DBProperty {
   longitude: number | null;
   features: string[] | null;
   is_featured: boolean;
+  owner_name: string | null;
+  owner_phone: string | null;
   created_at: string;
   updated_at: string;
 }

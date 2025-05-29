@@ -1,8 +1,9 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import NavBar from "@/components/NavBar";
 import ImageGallery from "@/components/ImageGallery";
+import ContactModal from "@/components/ContactModal";
+import ScheduleTourModal from "@/components/ScheduleTourModal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,6 +14,8 @@ import PropertyMap from "@/components/PropertyMap";
 const PropertyDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { property, loading, error } = useProperty(id || "");
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
 
   if (loading) {
     return (
@@ -155,20 +158,35 @@ const PropertyDetail = () => {
                   </div>
                   
                   <div className="space-y-4">
-                    <Button className="w-full">Contact Agent</Button>
-                    <Button variant="outline" className="w-full">Schedule Tour</Button>
+                    <Button 
+                      className="w-full" 
+                      onClick={() => setIsContactModalOpen(true)}
+                    >
+                      Contact Agent
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => setIsScheduleModalOpen(true)}
+                    >
+                      Schedule Tour
+                    </Button>
                   </div>
                   
                   <Separator className="my-6" />
                   
                   <div className="space-y-4">
                     <div>
-                      <div className="text-sm font-medium mb-1">Listing Agent</div>
+                      <div className="text-sm font-medium mb-1">Property Owner</div>
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-muted"></div>
+                        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                          <span className="text-sm font-medium">
+                            {property.owner_name ? property.owner_name.charAt(0).toUpperCase() : 'O'}
+                          </span>
+                        </div>
                         <div>
-                          <div className="font-medium">John Smith</div>
-                          <div className="text-sm text-muted-foreground">Real Estate Agent</div>
+                          <div className="font-medium">{property.owner_name || "Property Owner"}</div>
+                          <div className="text-sm text-muted-foreground">Property Owner</div>
                         </div>
                       </div>
                     </div>
@@ -176,8 +194,7 @@ const PropertyDetail = () => {
                     <div>
                       <div className="text-sm font-medium mb-1">Contact</div>
                       <div className="text-sm">
-                        <div className="mb-1">john@realestate.com</div>
-                        <div>(123) 456-7890</div>
+                        <div className="mb-1">{property.owner_phone || "Contact via form"}</div>
                       </div>
                     </div>
                   </div>
@@ -187,6 +204,21 @@ const PropertyDetail = () => {
           </div>
         </div>
       </main>
+      
+      <ContactModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+        ownerName={property.owner_name}
+        ownerPhone={property.owner_phone}
+        propertyTitle={property.title}
+      />
+      
+      <ScheduleTourModal
+        isOpen={isScheduleModalOpen}
+        onClose={() => setIsScheduleModalOpen(false)}
+        propertyTitle={property.title}
+        ownerPhone={property.owner_phone}
+      />
       
       <footer className="bg-white border-t py-6">
         <div className="container mx-auto text-center text-sm text-muted-foreground">

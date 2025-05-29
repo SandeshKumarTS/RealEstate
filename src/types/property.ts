@@ -23,6 +23,8 @@ export interface Property {
   isFeatured?: boolean;
   is_featured?: boolean | null;
   user_id: string;
+  owner_name: string | null;
+  owner_phone: string | null;
   created_at?: string | null;
   updated_at?: string | null;
 }

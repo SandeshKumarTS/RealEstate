@@ -31,6 +31,8 @@ const formSchema = z.object({
   latitude: z.coerce.number().optional(),
   longitude: z.coerce.number().optional(),
   features: z.string(),
+  owner_name: z.string().min(2, "Owner name must be at least 2 characters"),
+  owner_phone: z.string().min(10, "Phone number must be at least 10 characters"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -46,6 +48,8 @@ const EditProperty = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       features: "",
+      owner_name: "",
+      owner_phone: "",
     },
   });
 
@@ -89,6 +93,8 @@ const EditProperty = () => {
             latitude: data.latitude || undefined,
             longitude: data.longitude || undefined,
             features: Array.isArray(data.features) ? data.features.join(", ") : (data.features || ""),
+            owner_name: data.owner_name || "",
+            owner_phone: data.owner_phone || "",
           });
         }
       } catch (error) {
@@ -129,6 +135,8 @@ const EditProperty = () => {
           latitude: data.latitude,
           longitude: data.longitude,
           features: featuresArray,
+          owner_name: data.owner_name,
+          owner_phone: data.owner_phone,
         })
         .eq("id", id)
         .eq("user_id", user.id);
@@ -286,6 +294,42 @@ const EditProperty = () => {
                           <FormLabel>ZIP Code</FormLabel>
                           <FormControl>
                             <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Contact Information</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="owner_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Owner Name</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Enter owner name" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="owner_phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone Number</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="+1 (555) 123-4567" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

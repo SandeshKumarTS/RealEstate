@@ -46,6 +46,8 @@ export type Database = {
           is_featured: boolean | null
           latitude: number | null
           longitude: number | null
+          owner_name: string | null
+          owner_phone: string | null
           price: number
           property_type: string
           square_feet: number
@@ -68,6 +70,8 @@ export type Database = {
           is_featured?: boolean | null
           latitude?: number | null
           longitude?: number | null
+          owner_name?: string | null
+          owner_phone?: string | null
           price: number
           property_type: string
           square_feet: number
@@ -90,6 +94,8 @@ export type Database = {
           is_featured?: boolean | null
           latitude?: number | null
           longitude?: number | null
+          owner_name?: string | null
+          owner_phone?: string | null
           price?: number
           property_type?: string
           square_feet?: number
