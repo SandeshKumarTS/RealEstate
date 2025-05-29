@@ -9,10 +9,10 @@ export interface Property {
   price: number;
   bedrooms: number;
   bathrooms: number;
-  squareFeet: number | undefined;
+  squareFeet?: number;
   square_feet: number;
   description: string | null;
-  images?: string[];
+  images: string[];
   latitude: number | null;
   longitude: number | null;
   features: string[] | null;

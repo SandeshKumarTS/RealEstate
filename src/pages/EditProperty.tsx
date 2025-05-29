@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,7 +30,7 @@ const formSchema = z.object({
   property_type: z.string().min(1, "Property type is required"),
   latitude: z.coerce.number().optional(),
   longitude: z.coerce.number().optional(),
-  features: z.string().transform(val => val.split(',').map(v => v.trim()).filter(Boolean)),
+  features: z.string(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -45,6 +44,9 @@ const EditProperty = () => {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      features: "",
+    },
   });
 
   useEffect(() => {
@@ -107,6 +109,8 @@ const EditProperty = () => {
     setIsSubmitting(true);
 
     try {
+      const featuresArray = data.features.split(',').map(f => f.trim()).filter(Boolean);
+      
       const { error } = await supabase
         .from("properties")
         .update({
@@ -124,7 +128,7 @@ const EditProperty = () => {
           property_type: data.property_type,
           latitude: data.latitude,
           longitude: data.longitude,
-          features: data.features,
+          features: featuresArray,
         })
         .eq("id", id)
         .eq("user_id", user.id);

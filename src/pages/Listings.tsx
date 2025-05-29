@@ -4,56 +4,23 @@ import NavBar from "@/components/NavBar";
 import PropertyList from "@/components/PropertyList";
 import PropertyFilter from "@/components/PropertyFilter";
 import { Property, FilterOptions } from "@/types/property";
-import { properties } from "@/data/properties";
+import { useProperties } from "@/hooks/useProperties";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const Listings = () => {
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>(properties);
-  const [isLoading, setIsLoading] = useState(false);
+  const [filters, setFilters] = useState<FilterOptions>({
+    priceRange: [0, 10000000],
+    bedrooms: null,
+    bathrooms: null,
+    propertyType: null,
+    features: [],
+  });
   
-  const handleFilterChange = (filters: FilterOptions) => {
-    setIsLoading(true);
-    
-    // Simulate API delay
-    setTimeout(() => {
-      const filtered = properties.filter(property => {
-        // Price range filter
-        if (property.price < filters.priceRange[0] || property.price > filters.priceRange[1]) {
-          return false;
-        }
-        
-        // Bedrooms filter
-        if (filters.bedrooms !== null && property.bedrooms < filters.bedrooms) {
-          return false;
-        }
-        
-        // Bathrooms filter
-        if (filters.bathrooms !== null && property.bathrooms < filters.bathrooms) {
-          return false;
-        }
-        
-        // Property type filter
-        if (filters.propertyType !== null && property.propertyType !== filters.propertyType) {
-          return false;
-        }
-        
-        // Features filter
-        if (filters.features.length > 0) {
-          const hasAllFeatures = filters.features.every(feature => 
-            property.features.includes(feature)
-          );
-          if (!hasAllFeatures) {
-            return false;
-          }
-        }
-        
-        return true;
-      });
-      
-      setFilteredProperties(filtered);
-      setIsLoading(false);
-    }, 500);
+  const { properties, loading: isLoading } = useProperties(filters);
+  
+  const handleFilterChange = (newFilters: FilterOptions) => {
+    setFilters(newFilters);
   };
 
   return (
@@ -80,7 +47,7 @@ const Listings = () => {
             </div>
             
             <div className="lg:col-span-3">
-              <PropertyList properties={filteredProperties} isLoading={isLoading} />
+              <PropertyList properties={properties} isLoading={isLoading} />
             </div>
           </div>
         </div>
